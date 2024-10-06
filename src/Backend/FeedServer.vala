@@ -438,7 +438,8 @@ public class FeedReader.FeedServer : GLib.Object {
 			var session = new Soup.Session();
 			session.user_agent = Constants.USER_AGENT;
 			session.timeout = 5;
-			session.ssl_strict = false;
+			session.tls_database = null;
+			session.tls_interaction = null;
 
 			try
 			{
@@ -583,7 +584,8 @@ public class FeedReader.FeedServer : GLib.Object {
 		var session = new Soup.Session();
 		session.user_agent = Constants.USER_AGENT;
 		session.timeout = 5;
-		session.ssl_strict = false;
+		session.tls_database = null;
+		session.tls_interaction = null;
 
 		var a = new Article ("",
 			"",
@@ -673,7 +675,8 @@ public class FeedReader.FeedServer : GLib.Object {
 		var session = new Soup.Session();
 		session.user_agent = Constants.USER_AGENT;
 		session.timeout = 5;
-		session.ssl_strict = false;
+		session.tls_database = null;
+		session.tls_interaction = null;
 
 		var html_cntx = new Html.ParserCtxt();
 		html_cntx.use_options(Html.ParserOption.NOERROR + Html.ParserOption.NOWARNING);

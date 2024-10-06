@@ -5,7 +5,7 @@ app-id: com.github.suzie97.communique
 # we can use a convenient pre-made runtime and SDK. For this example, we'll be
 # using the runtime and SDK provided by elementary.
 runtime: io.elementary.Platform
-runtime-version: '7'
+runtime-version: '8'
 sdk: io.elementary.Sdk
 
 # This should match the exec line in your .desktop file and usually is the same
@@ -41,9 +41,9 @@ modules:
   - name: libpeas
     buildsystem: meson
     sources:
-    - type: git
-      url: https://gitlab.gnome.org/GNOME/libpeas.git
-      branch: master
+    - type: archive
+      url: https://download.gnome.org/sources/libpeas/1.36/libpeas-1.36.0.tar.xz
+      sha256: 297cb9c2cccd8e8617623d1a3e8415b4530b8e5a893e3527bbfd1edd13237b4c
 
   - name: rest
     cleanup:
@@ -51,16 +51,20 @@ modules:
       - '*.la'
       - '/lib/pkgconfig'
       - '/share'
+    buildsystem: meson
+    config-opts:
+      - '-Dgtk_doc=false'
     sources:
     - type: archive
-      url: "https://download.gnome.org/sources/rest/0.8/rest-0.8.1.tar.xz"
-      sha256: 0513aad38e5d3cedd4ae3c551634e3be1b9baaa79775e53b2dba9456f15b01c9
+      url: https://download.gnome.org/sources/rest/0.9/rest-0.9.1.tar.xz
+      sha256: 9266a5c10ece383e193dfb7ffb07b509cc1f51521ab8dad76af96ed14212c2e3
 
   - name: gnome-online-accounts
+    buildsystem: meson
     sources:
     - type: archive
-      url: https://download-fallback.gnome.org/sources/gnome-online-accounts/3.40/gnome-online-accounts-3.40.0.tar.xz
-      sha256: 585c4f979f6f543b77bfdb4fb01eb18ba25c2aec5b7866c676d929616fb2c3fa
+      url: https://download.gnome.org/sources/gnome-online-accounts/3.48/gnome-online-accounts-3.48.3.tar.xz
+      sha256: 37e4372c345c770f7172da3c605183a43081ea0e915ecc448fb2d65a38e9d565
 
   - name: gumbo
     sources:

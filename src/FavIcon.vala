@@ -288,7 +288,13 @@ public class FeedReader.FavIcon : GLib.Object
 			}
 
 			// try domainname/favicon.ico
-			var uri = new Soup.URI(m_feed.getURL());
+			GLib.Uri uri = null;
+			try {
+				uri = GLib.Uri.parse(m_feed.getURL(), GLib.UriFlags.NONE);
+			} catch (GLib.UriError e) {
+				Logger.error(@"Fetching favicon failed: can't parse url $(m_feed.getURL())! Seems to be not valid.");
+			}
+
 			string? siteURL = null;
 			if(uri != null)
 			{
@@ -334,7 +340,7 @@ public class FeedReader.FavIcon : GLib.Object
 			string html;
 			try
 			{
-				var bodyStream = yield Utils.getSession().send_async(message_html);
+				var bodyStream = yield Utils.getSession().send_async(message_html, 2, cancellable);
 				html = (string)yield Utils.inputStreamToArray(bodyStream, cancellable);
 			}
 			catch (Error e)
@@ -432,7 +438,7 @@ public class FeedReader.FavIcon : GLib.Object
 		uint8[]? data;
 		try
 		{
-			var bodyStream = yield Utils.getSession().send_async(message, cancellable);
+			var bodyStream = yield Utils.getSession().send_async(message, 1, cancellable);
 			data = yield Utils.inputStreamToArray(bodyStream, cancellable);
 		}
 		catch (Error e)

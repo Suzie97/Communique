@@ -3,7 +3,8 @@ builddir/
 _build/
 .mypy_cache
 .vscode/
-*.~
+*~
 .DS_Store
 build-aux/flatpak/build
 build-aux/flatpak/.flatpak-builder
+.flatpak-builder

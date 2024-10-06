@@ -78,7 +78,7 @@ public class FeedbinAPI : Object {
 			message.request_body.append_take(input.data);
 		}
 
-		m_session.send_message(message);
+		m_session.send_and_read(message);
 		var status = message.status_code;
 		if(status < 200 || status >= 400)
 		{

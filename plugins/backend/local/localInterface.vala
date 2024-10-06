@@ -529,8 +529,8 @@ public class FeedReader.localInterface : FeedServerInterface {
 				var session = new Soup.Session();
 				session.user_agent = Constants.USER_AGENT;
 				session.timeout = 5;
-				session.send_message(msg);
-				string xml = (string)msg.response_body.flatten().data;
+				var response_body = session.send_and_read(msg);
+				string xml = (string)response_body.get_data();
 
 				// parse
 				Rss.Parser parser = new Rss.Parser();

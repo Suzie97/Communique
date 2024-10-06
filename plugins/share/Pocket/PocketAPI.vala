@@ -78,9 +78,9 @@ public class FeedReader.PocketAPI : ShareAccountInterface, Peas.ExtensionBase {
 			message_soup.request_headers.append("DNT", "1");
 		}
 
-		session.send_message(message_soup);
+		var response_body = session.send_and_read(message_soup);
 
-		string response = (string)message_soup.response_body.flatten().data;
+		string response = (string)response_body.get_data();
 		return response.substring(response.index_of_char('=')+1);
 	}
 
@@ -98,15 +98,15 @@ public class FeedReader.PocketAPI : ShareAccountInterface, Peas.ExtensionBase {
 			message_soup.request_headers.append("DNT", "1");
 		}
 
-		session.send_message(message_soup);
+		var response_body = session.send_and_read(message_soup);
 
-		if((string)message_soup.response_body.flatten().data == null
-		|| (string)message_soup.response_body.flatten().data == "")
+		if((string)response_body.get_data() == null
+		|| (string)response_body.get_data() == "")
 		{
 			return false;
 		}
 
-		string response = (string)message_soup.response_body.flatten().data;
+		string response = (string)response_body.get_data();
 		Logger.debug(response);
 		int tokenStart = response.index_of_char('=')+1;
 		int tokenEnd = response.index_of_char('&', tokenStart);
@@ -183,10 +183,10 @@ public class FeedReader.PocketAPI : ShareAccountInterface, Peas.ExtensionBase {
 			message_soup.request_headers.append("DNT", "1");
 		}
 
-		session.send_message(message_soup);
+		var response_body = session.send_and_read(message_soup);
 
-		if((string)message_soup.response_body.flatten().data == null
-		|| (string)message_soup.response_body.flatten().data == "")
+		if((string)response_body.get_data() == null
+		|| (string)response_body.get_data() == "")
 		{
 			return false;
 		}

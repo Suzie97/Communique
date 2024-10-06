@@ -34,7 +34,9 @@ public class FeedReader.localUtils : GLib.Object {
 			return null;
 		}
 
-		uint status = session.send_message(msg);
+		var response_body = session.send_and_read(msg);
+		uint status = msg.status_code;
+
 		if(status < 100 || status >= 400)
 		{
 			if(status < 100)
@@ -51,7 +53,7 @@ public class FeedReader.localUtils : GLib.Object {
 			Logger.warning(errmsg);
 			return null;
 		}
-		string xml = (string)msg.response_body.flatten().data;
+		string xml = (string)response_body.get_data();
 		string? url = null;
 
 		// parse

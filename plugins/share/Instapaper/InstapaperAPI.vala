@@ -184,8 +184,8 @@ public class FeedReader.InstaAPI : ShareAccountInterface, Peas.ExtensionBase {
 			message_soup.request_headers.append("DNT", "1");
 		}
 
-		session.send_message(message_soup);
-		string response = (string)message_soup.response_body.flatten().data;
+		var response_body = session.send_and_read(message_soup);
+		string response = (string)response_body.get_data();
 
 		if(response == null || response == "")
 		{

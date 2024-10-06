@@ -25,28 +25,28 @@ public class FeedReader.freshConnection {
 		m_settingsTweaks = new GLib.Settings("com.github.suzie97.communique.tweaks");
 		m_session = new Soup.Session();
 		m_session.user_agent = Constants.USER_AGENT;
-		m_session.authenticate.connect((msg, auth, retrying) => {
-			if(m_utils.getHtaccessUser() == "")
-			{
-				Logger.error("fresh Session: need Authentication");
-			}
-			else if(!retrying)
-			{
-				auth.authenticate(m_utils.getHtaccessUser(), m_utils.getHtaccessPasswd());
-			}
-		});
 	}
 
 	public LoginResponse getSID()
 	{
 		var message = new Soup.Message("POST", m_utils.getURL()+"accounts/ClientLogin");
 
+		message.authenticate.connect((auth, retrying) => {
+			if(m_utils.getHtaccessUser() == "") {
+				Logger.error("fresh Session: need Authentication");
+			} else if(!retrying) {
+				auth.authenticate(m_utils.getHtaccessUser(), m_utils.getHtaccessPasswd());
+				return true;
+			}
+			return false;
+		});
+
 		var msg = new freshMessage();
 		msg.add("Email", m_utils.getUser());
 		msg.add("Passwd", m_utils.getPasswd());
 
-		message.set_request("application/x-www-form-urlencoded", Soup.MemoryUse.COPY, msg.get().data);
-		m_session.send_message(message);
+		message.set_request_body_from_bytes("application/x-www-form-urlencoded", new Bytes(msg.get().data));
+		var response_body = m_session.send_and_read(message);
 
 		if(message.status_code != 200)
 		{
@@ -54,7 +54,7 @@ public class FeedReader.freshConnection {
 			return LoginResponse.NO_CONNECTION;
 		}
 
-		string response = (string)message.response_body.flatten().data;
+		string response = (string)response_body.get_data();
 
 		if(!response.has_prefix("SID="))
 		{
@@ -91,8 +91,8 @@ public class FeedReader.freshConnection {
 		message.request_headers.append("Authorization","GoogleLogin auth=%s".printf(m_utils.getToken()));
 		message.request_headers.append("Content-Type", type);
 
-		message.request_body.append_take(input.data);
-		m_session.send_message(message);
+		message.set_request_body_from_bytes(type, new Bytes(input.data));
+		var response_body = m_session.send_and_read(message);
 
 		if(message.status_code != 200)
 		{
@@ -101,7 +101,7 @@ public class FeedReader.freshConnection {
 
 		return Response() {
 			status = message.status_code,
-			data = (string)message.response_body.flatten().data
+			data = (string)response_body.get_data()
 		};
 	}
 
@@ -115,7 +115,7 @@ public class FeedReader.freshConnection {
 			message.request_headers.append("DNT", "1");
 		}
 
-		m_session.send_message(message);
+		var response_body = m_session.send_and_read(message);
 
 		if(message.status_code != 200)
 		{
@@ -124,7 +124,7 @@ public class FeedReader.freshConnection {
 
 		return Response() {
 			status = message.status_code,
-			data = (string)message.response_body.flatten().data
+			data = (string)response_body.get_data()
 		};
 	}
 }

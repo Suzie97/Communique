@@ -40,10 +40,10 @@ public class FeedReader.WallabagAPI : ShareAccountInterface, Peas.ExtensionBase 
 		string url = baseURL + "oauth/v2/token";
 		var message_soup = new Soup.Message("POST", url);
 		message_soup.set_request("application/x-www-form-urlencoded; charset=UTF8", Soup.MemoryUse.COPY, message.data);
-		session.send_message(message_soup);
+		var response_body = session.send_and_read(message_soup);
 
-		if((string)message_soup.response_body.flatten().data == null
-		|| (string)message_soup.response_body.flatten().data == "")
+		if((string)response_body.get_data() == null
+		|| (string)response_body.get_data() == "")
 		{
 			Logger.error("WallabagAPI - getAccessToken: no response");
 			Logger.error(url);
@@ -51,7 +51,7 @@ public class FeedReader.WallabagAPI : ShareAccountInterface, Peas.ExtensionBase 
 			return false;
 		}
 
-		string response = (string)message_soup.response_body.flatten().data;
+		string response = (string)response_body.get_data();
 		Logger.debug(response);
 
 		var parser = new Json.Parser();
@@ -154,10 +154,10 @@ public class FeedReader.WallabagAPI : ShareAccountInterface, Peas.ExtensionBase 
 		var message_soup = new Soup.Message("POST", baseURL + "api/entries.json");
 		message_soup.set_request("application/x-www-form-urlencoded; charset=UTF8", Soup.MemoryUse.COPY, message.data);
 		message_soup.request_headers.append("Authorization", "Bearer " + settings.get_string("oauth-access-token"));
-		session.send_message(message_soup);
+		session.send_and_read(message_soup);
 
-		if((string)message_soup.response_body.flatten().data == null
-		|| (string)message_soup.response_body.flatten().data == "")
+		if((string)response_body.get_data() == null
+		|| (string)response_body.get_data() == "")
 		{
 			Logger.error("WallabagAPI - addBookmark: no response");
 			Logger.error(url);

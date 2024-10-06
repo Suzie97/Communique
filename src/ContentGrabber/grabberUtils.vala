@@ -630,7 +630,9 @@ public class FeedReader.grabberUtils : GLib.Object {
 				message_dlImg.request_headers.append("DNT", "1");
 			}
 
-			var status = session.send_message(message_dlImg);
+			var response_body = session.send_and_read(message_dlImg);
+			var status = message_dlImg.status_code;
+
 			if(status == 200)
 			{
 				var params = new GLib.HashTable<string, string>(null, null);
@@ -646,8 +648,8 @@ public class FeedReader.grabberUtils : GLib.Object {
 
 				try{
 					FileUtils.set_contents( localFilename,
-						(string)message_dlImg.response_body.flatten().data,
-					(long)message_dlImg.response_body.length);
+						(string)response_body.get_data(),
+					(long)response_body.length);
 				}
 				catch(GLib.FileError e)
 				{
@@ -772,7 +774,7 @@ public class FeedReader.grabberUtils : GLib.Object {
 				{
 					return null;
 				}
-				session.send_message(message);
+				session.send_and_read(message);
 				var params = new GLib.HashTable<string, string>(null, null);
 				string? contentType = message.response_headers.get_content_type(out params);
 				size = message.response_headers.get_content_length();
@@ -781,7 +783,7 @@ public class FeedReader.grabberUtils : GLib.Object {
 				{
 					return null;
 				}
-				session.send_message(message2);
+				session.send_and_read(message2);
 				origSize = message2.response_headers.get_content_length();
 				if(contentType != null)
 				{

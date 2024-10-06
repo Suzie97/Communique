@@ -105,9 +105,9 @@ public class FeedReader.Grabber : GLib.Object {
 	{
 		Logger.debug("Grabber: process article: " + m_articleURL);
 
-		var uri = new Soup.URI(m_articleURL);
-		if(uri == null)
-		{
+		try {
+			var uri = GLib.Uri.parse(m_articleURL, GLib.UriFlags.NONE);
+		} catch (GLib.UriError e) {
 			Logger.error("No valid article-url?!?");
 			return false;
 		}
@@ -204,7 +204,7 @@ public class FeedReader.Grabber : GLib.Object {
 			return false;
 		}
 
-		m_session.send_message(message);
+		m_session.send_and_read(message);
 		var params = new GLib.HashTable<string, string>(null, null);
 		string? contentType = message.response_headers.get_content_type(out params);
 		if(contentType != null)
@@ -229,7 +229,7 @@ public class FeedReader.Grabber : GLib.Object {
 			if(msg.status_code == Soup.Status.MOVED_TEMPORARILY
 			|| msg.status_code == Soup.Status.MOVED_PERMANENTLY)
 			{
-				m_articleURL = msg.uri.to_string(false);
+				m_articleURL = msg.uri.to_string();
 				m_article.setURL(m_articleURL);
 				Logger.debug("Grabber: new url is: " + m_articleURL);
 			}
@@ -245,22 +245,22 @@ public class FeedReader.Grabber : GLib.Object {
 			msg.request_headers.append("DNT", "1");
 		}
 
-		m_session.send_message(msg);
+		var response_body = m_session.send_and_read(msg);
 		msg.disconnect(handlerID);
 
-		if(msg.response_body == null)
+		if(response_body == null)
 		{
 			Logger.debug("Grabber: download failed - no response");
 			return false;
 		}
 
-		if((string)msg.response_body.flatten().data == "")
+		if((string)response_body.get_data() == "")
 		{
 			Logger.debug("Grabber: download failed - empty response");
 			return false;
 		}
 
-		m_rawHtml = (string)msg.response_body.flatten().data;
+		m_rawHtml = (string)response_body.get_data();
 		if(!m_rawHtml.validate())
 		{
 			string needle = "content=\"text/html; charset=";

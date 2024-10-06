@@ -17,6 +17,7 @@ public class FeedReader.OwnCloudNewsMessage : GLib.Object {
 
 	private Soup.Session m_session;
 	private Soup.Message m_message_soup;
+	private Bytes response_body;
 	private GLib.StringBuilder m_message_string;
 	private string m_contenttype;
 	private Json.Parser m_parser;
@@ -136,7 +137,8 @@ public class FeedReader.OwnCloudNewsMessage : GLib.Object {
 			m_message_soup.request_headers.append("DNT", "1");
 		}
 
-		var status = m_session.send_message(m_message_soup);
+		response_body = m_session.send_and_read(m_message_soup);
+		var status = m_message_soup.status_code;
 
 		if(status == 401)         // unauthorized
 
@@ -164,7 +166,7 @@ public class FeedReader.OwnCloudNewsMessage : GLib.Object {
 
 		try
 		{
-			m_parser.load_from_data((string)m_message_soup.response_body.flatten().data);
+			m_parser.load_from_data((string)response_body.get_data());
 		}
 		catch(Error e)
 		{
@@ -200,6 +202,6 @@ public class FeedReader.OwnCloudNewsMessage : GLib.Object {
 
 	public void printResponse()
 	{
-		Logger.debug((string)m_message_soup.response_body.flatten().data);
+		Logger.debug((string)response_body.get_data());
 	}
 }

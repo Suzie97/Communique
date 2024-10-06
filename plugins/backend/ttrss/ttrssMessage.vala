@@ -17,6 +17,7 @@ public class FeedReader.ttrssMessage : GLib.Object {
 
 	private Soup.Session m_session;
 	private Soup.Message m_message_soup;
+	private Bytes response_body;
 	private Json.Object m_request_object = new Json.Object();
 	private const string m_contenttype = "application/x-www-form-urlencoded";
 	private Json.Object m_response_object;
@@ -97,7 +98,8 @@ public class FeedReader.ttrssMessage : GLib.Object {
 			m_message_soup.request_headers.append("DNT", "1");
 		}
 
-		var status_code = m_session.send_message(m_message_soup);
+		response_body = m_session.send_and_read(m_message_soup);
+		var status_code = m_message_soup.status_code;
 
 		if(status_code == 401)         // unauthorized
 
@@ -126,7 +128,7 @@ public class FeedReader.ttrssMessage : GLib.Object {
 		var parser = new Json.Parser();
 		try
 		{
-			parser.load_from_data((string)m_message_soup.response_body.flatten().data);
+			parser.load_from_data((string)response_body.get_data());
 		}
 		catch(Error e)
 		{
@@ -219,7 +221,7 @@ public class FeedReader.ttrssMessage : GLib.Object {
 				});
 			}
 			var request = object_to_string(obj);
-			var response = (string)m_message_soup.response_body.flatten().data;
+			var response = (string)response_body.get_data();
 			Logger.error(@"$prefix\nURL: $url\nRequest object: $request\nResponse: $response");
 		}
 

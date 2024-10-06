@@ -23,7 +23,8 @@ public class FeedReader.Utils : GLib.Object {
 		{
 			m_session = new Soup.Session();
 			m_session.user_agent = Constants.USER_AGENT;
-			m_session.ssl_strict = false;
+			m_session.tls_database = null;
+			m_session.tls_interaction = null;
 			m_session.timeout = 5;
 		}
 
@@ -262,10 +263,10 @@ public class FeedReader.Utils : GLib.Object {
 		public static bool ping(string link)
 		{
 			Logger.debug("Ping: " + link);
-			var uri = new Soup.URI(link);
-
-			if(uri == null)
-			{
+			GLib.Uri uri;
+			try {
+				uri = GLib.Uri.parse(link, GLib.UriFlags.NONE);
+			} catch (GLib.UriError e) {
 				Logger.error(@"Ping failed: can't parse url $link! Seems to be not valid.");
 				return false;
 			}
@@ -278,7 +279,8 @@ public class FeedReader.Utils : GLib.Object {
 				return false;
 			}
 
-			var status = getSession().send_message(message);
+			getSession().send_and_read(message);
+			var status = message.status_code;
 
 			Logger.debug(@"Ping: status $status");
 
